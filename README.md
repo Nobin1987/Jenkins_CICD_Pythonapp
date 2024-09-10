@@ -1,4 +1,4 @@
-Jenkins CI/CD Pipeline for Python Flask Application
+# Jenkins CI/CD Pipeline for Python Flask Application
 This repository contains a Jenkins CI/CD pipeline configuration for deploying a Python Flask application. The pipeline automates the process of building, testing, and deploying the application to an AWS EC2 instance using Git, Jenkins, and systemd.
 
 Table of Contents
