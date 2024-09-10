@@ -50,14 +50,13 @@ pipeline {
         // }
 
 
-    
-    stages {
+
         stage('Build') {
             steps {
                 sh """
                     python3 -m venv ${VENV_PATH}
                     . ${VENV_PATH}/bin/activate
-                    pip install -r requirements.txt
+                    pip3 install -r requirements.txt
                 """
             }
         }
@@ -66,11 +65,15 @@ pipeline {
             steps {
                 sh """
                     . ${VENV_PATH}/bin/activate
-                    pytest
+                    export PYTHONPATH=\${WORKSPACE}:\$PYTHONPATH
+                    echo "Current directory: \$(pwd)"
+                    echo "Contents of current directory: \$(ls -la)"
+                    echo "Python path: \$PYTHONPATH"
+                    pytest Tests -v
                 """
             }
         }
-        }
+        
         stage('Push to EC2') {
             when {
                 expression {
@@ -83,5 +86,16 @@ pipeline {
         
     }
     
-}
+    }
+post {
+        success {
+            echo "Pipeline succeeded! Application deployed to staging."
+        }
+        failure {
+            echo "Pipeline failed. Check the logs for details."
+        }
+        always {
+            sh "rm -rf ${VENV_PATH}"
+        }
+    }
 }
