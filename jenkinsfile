@@ -1,0 +1,48 @@
+pipeline {
+    agent any
+    environment {
+        GIT_REPO = "https://github.com/Nobin1987/Jenkins_CICD_Pythonapp.git"
+        SSH_CRED_ID = "prashant-deploy"
+        EC2_USER = "ubuntu"
+        EC_HOST = "3.110.142.165"
+        BUILD_STATUS = "SUCESS"  // Default
+    }
+
+    stages {
+        stage('Code cloning') {
+            steps {
+                echo 'Cloning the code'
+                git branch: 'main' , url : "${env.GIT_REPO}"
+            }
+        }
+        stage('Build') {
+            steps {
+                echo 'Building the code'
+                sh 'pip install -r requirement.txt'
+            }
+        }
+        stage('Test') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    script {
+                        echo 'Running unit tests...'
+                        sh 'pytest tests/test_app.py --maxfail=1 --disable-warnings' // Run the test
+                    }
+                }
+            }
+            
+        }
+        stage('Push to EC2') {
+            when {
+                expression {
+                    return currentBuild.result == null || currentBuild.result == 'SUCCESS'
+                }
+            }
+            steps {
+                echo 'Copy the code '
+            }
+        
+    }
+    
+}
+}
