@@ -15,23 +15,36 @@ pipeline {
                 git branch: 'main' , url : "${env.GIT_REPO}"
             }
         }
-        stage('Build') {
+        // stage('Build') {
+        //     steps {
+        //         echo 'Building the code'
+        //         sh 'pip3 install -r requirement.txt'
+        //     }
+        }
+                stage('Set Up Environment') {
             steps {
-                echo 'Building the code'
-                sh 'pip3 install -r requirement.txt'
+                script {
+                    echo 'Setting up virtual environment...'
+                    // Create a virtual environment
+                    sh 'python3 -m venv venv'
+                    // Activate the virtual environment and install dependencies
+                    sh '. venv/bin/activate && pip install -r requirements.txt'
+                }
             }
         }
+
         stage('Test') {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     script {
                         echo 'Running unit tests...'
-                        sh 'pytest tests/test_app.py --maxfail=1 --disable-warnings' // Run the test
+                        // Activate the virtual environment and run tests
+                        sh '. venv/bin/activate && pytest tests/test_app.py --maxfail=1 --disable-warnings'
                     }
                 }
             }
-            
         }
+
         stage('Push to EC2') {
             when {
                 expression {
