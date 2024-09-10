@@ -105,6 +105,9 @@ Select webhooks and add Webhooks
 
 ![image](images/webhook3.png)
 
+![CICD PIPLINE FINAL](images/Pipline_final.png)
+
+![WEBAPP](images/webapp.png)
 
 ## Troubleshooting
 Service Failed to Start: Check the logs using sudo journalctl -u flaskapp.service.
