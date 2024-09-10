@@ -6,6 +6,7 @@ pipeline {
         EC2_USER = "ubuntu"
         EC_HOST = "3.110.142.165"
         BUILD_STATUS = "SUCESS"  // Default
+        VENV_PATH = "/tmp/${env.JOB_NAME}-${env.BUILD_ID}-venv"
     }
     triggers {
         githubPush()
@@ -50,23 +51,25 @@ pipeline {
 
 
     
+    stages {
         stage('Build') {
             steps {
-                sh '''
-                    python3 -m venv venv
-                    . venv/bin/activate
+                sh """
+                    python3 -m venv ${VENV_PATH}
+                    . ${VENV_PATH}/bin/activate
                     pip install -r requirements.txt
-                '''
+                """
             }
         }
 
         stage('Test') {
             steps {
-                sh '''
-                    . venv/bin/activate
+                sh """
+                    . ${VENV_PATH}/bin/activate
                     pytest
-                '''
+                """
             }
+        }
         }
         stage('Push to EC2') {
             when {
