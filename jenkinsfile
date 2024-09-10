@@ -2,12 +2,12 @@ pipeline {
     agent any
     environment {
         GIT_REPO = "https://github.com/Nobin1987/Jenkins_CICD_Pythonapp.git"
-        SSH_CRED_ID = "ec2_webapp"
+        SSH_CRED_ID = "appserver"
         EC2_USER = "ubuntu"
-        EC2_HOST = "18.224.136.215"
+        EC2_HOST = "18.224.4.140"
         BUILD_STATUS = "SUCCESS"  // Default
         VENV_PATH = "/tmp/${env.JOB_NAME}-${env.BUILD_ID}-venv"
-        APP_PATH = "/home/ubuntu"
+        APP_PATH = "/home/ubuntu/Jenkins_CICD_Pythonapp"
     }
     triggers {
         githubPush()
@@ -51,15 +51,15 @@ pipeline {
                 }
             }
             steps {
-                sshagent (credentials: ["${env.SSH_CRED_ID}"]) {
+                sshagent(credentials: ['ec2-webserver']) {
                     sh """
-                        ssh ${EC2_USER}@${EC2_HOST} << EOF
+                        ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} '
                         cd ${APP_PATH}
                         git pull origin main
                         source venv/bin/activate
                         pip install -r requirements.txt
                         sudo systemctl restart flaskapp
-                        EOF
+                        '
                     """
                 }
             }
