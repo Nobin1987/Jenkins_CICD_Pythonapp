@@ -4,8 +4,8 @@ pipeline {
         GIT_REPO = "https://github.com/Nobin1987/Jenkins_CICD_Pythonapp.git"
         SSH_CRED_ID = "ec2_webapp"
         EC2_USER = "ubuntu"
-        EC_HOST = "18.224.136.215"
-        BUILD_STATUS = "SUCESS"  // Default
+        EC2_HOST = "18.224.136.215"
+        BUILD_STATUS = "SUCCESS"  // Default
         VENV_PATH = "/tmp/${env.JOB_NAME}-${env.BUILD_ID}-venv"
         APP_PATH = "/home/ubuntu"
     }
@@ -17,15 +17,16 @@ pipeline {
         stage('Code cloning') {
             steps {
                 echo 'Cloning the code'
-                git branch: 'main' , url : "${env.GIT_REPO}"
+                git branch: 'main', url: "${env.GIT_REPO}"
             }
+        }  // Missing closing bracket for stage 'Code cloning'
 
         stage('Build') {
             steps {
                 sh """
                     python3 -m venv ${VENV_PATH}
                     . ${VENV_PATH}/bin/activate
-                    pip3 install -r requirements.txt
+                    pip install -r requirements.txt
                 """
             }
         }
@@ -50,24 +51,22 @@ pipeline {
                 }
             }
             steps {
-
                 sshagent (credentials: ["${env.SSH_CRED_ID}"]) {
-                       sh """
-                            ssh ${EC2_USER}@${EC2_HOST} << EOF
-                            cd ${APP_PATH}
-                            git pull origin ${BRANCH_NAME}
-                            source venv/bin/activate
-                            pip install -r requirements.txt
-                            sudo systemctl restart flaskapp
-                            EOF
-                        """
+                    sh """
+                        ssh ${EC2_USER}@${EC2_HOST} << EOF
+                        cd ${APP_PATH}
+                        git pull origin main
+                        source venv/bin/activate
+                        pip install -r requirements.txt
+                        sudo systemctl restart flaskapp
+                        EOF
+                    """
                 }
             }
-        
-    }
-    
-    }
-post {
+        }
+    }  // Closing stages block
+
+    post {
         success {
             echo "Pipeline succeeded! Application deployed to staging."
         }
